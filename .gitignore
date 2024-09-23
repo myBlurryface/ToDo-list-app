@@ -1,0 +1,32 @@
+# Окружение
+venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+
+# Служебные файлы
+*.pyc
+*.pyo
+*.pyd
+__pycache__/
+*.sqlite3
+
+# Логи и временные файлы
+*.log
+*.pot
+*.mo
+*.pid
+*.swp
+*.swo
+*.cover
+*.DS_Store
+
+# Миграции
+*/migrations/*
+
+# Файлы статических и медиа-данных
+staticfiles/
+media/
+
