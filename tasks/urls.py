@@ -19,6 +19,12 @@ urlpatterns = [
 
     # Удаление задачи по UID (только владельцем)
     path('tasks/<int:pk>/delete/', views.TaskDeleteView.as_view(), name='task-delete'),
+
+    # Установка статуса задачи complete
+    path('tasks/<int:pk>/complete/', views.MarkTaskCompletedView.as_view(), name='task-complete'),
+
+    # Фильтр задач по статусу
+    path('tasks/status/', views.TaskFilterStatusView.as_view(), name='task-filter-by-status'),
 ]
 
 
