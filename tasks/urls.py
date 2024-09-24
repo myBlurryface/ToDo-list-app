@@ -1,4 +1,5 @@
 from django.urls import path
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from . import views      
 
 urlpatterns = [
@@ -25,6 +26,12 @@ urlpatterns = [
 
     # Фильтр задач по статусу
     path('tasks/status/', views.TaskFilterStatusView.as_view(), name='task-filter-by-status'),
+
+    # JWT - эндпоинты
+    # Получение refresh и acess токенов
+    path('api/token/', TokenObtainPairView.as_view(), name='token-obtain-pair'),  
+    # Обновление acess токена
+    path('api/token/refresh/', TokenRefreshView.as_view(), name='token-refresh'), 
 ]
 
 

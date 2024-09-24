@@ -13,7 +13,7 @@ from .serializers import TaskSerializer
 class TaskListView(generics.ListAPIView):
     queryset = Task.objects.all()
     serializer_class = TaskSerializer 
-
+    permission_classes = [permissions.IsAuthenticated]
 
 # Получение задач пользователя по 'username'
 class UserTasksView(generics.ListAPIView):
