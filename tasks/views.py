@@ -11,7 +11,7 @@ from .serializers import TaskSerializer
 
 # Получение списка всех задач
 class TaskListView(generics.ListAPIView):
-    queryset = Task.objects.all()
+    queryset = Task.objects.all().order_by('-id')
     serializer_class = TaskSerializer 
     permission_classes = [permissions.IsAuthenticated]
 
@@ -25,13 +25,8 @@ class UserTasksView(generics.ListAPIView):
         User = get_user_model()
         username = self.kwargs.get('username')
 
-        # Если в запросе передан username, выводим список по этому username
-        if username:
-            user = User.objects.get(username=username)
-            return Task.objects.filter(user=user)
-
-        # Если username не указан, выводим список по username текущего пользователя
-        return Task.objects.filter(user=self.request.user)
+        user = User.objects.get(username=username)
+        return Task.objects.filter(user=user).order_by('-id')
         
 
 # Получение задачи по ее UID
@@ -88,6 +83,7 @@ class TaskUpdateView(generics.UpdateAPIView):
 
 # Удаление задачи по UID
 class TaskDeleteView(generics.DestroyAPIView):
+    queryset = Task.objects.all()
     serializer_class = TaskSerializer
     permission_classes = [permissions.IsAuthenticated]
 
@@ -104,6 +100,7 @@ class TaskDeleteView(generics.DestroyAPIView):
 
 # Установка статуса 'complete'
 class MarkTaskCompletedView(generics.UpdateAPIView):
+    queryset = Task.objects.all()
     serializer_class = TaskSerializer  
     permission_classes = [IsAuthenticated]
 
@@ -123,4 +120,4 @@ class TaskFilterStatusView(generics.ListAPIView):
 
     def get_queryset(self):
         status = self.kwargs.get('status') # Получение статуса из запроса
-        return Task.objects.filter(status=status)
+        return Task.objects.filter(status=status).order_by('-id')
