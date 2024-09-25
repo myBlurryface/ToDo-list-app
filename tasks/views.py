@@ -17,6 +17,7 @@ class TaskListView(generics.ListAPIView):
 
 # Получение задач пользователя по 'username'
 class UserTasksView(generics.ListAPIView):
+    queryset = Task.objects.all()
     serializer_class = TaskSerializer
     permission_classes = [permissions.IsAuthenticated]
 
@@ -31,13 +32,28 @@ class UserTasksView(generics.ListAPIView):
 
         # Если username не указан, выводим список по username текущего пользователя
         return Task.objects.filter(user=self.request.user)
-
+        
 
 # Получение задачи по ее UID
 class TaskDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Task.objects.all()
     serializer_class = TaskSerializer
     permission_classes = [permissions.IsAuthenticated]
+
+    # Блокируем удаление
+    def delete(self, request, *args, **kwargs):
+        return Response({"detail": "Deletion via this endpoint is not allowed."},
+                        status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
+    # Блокируем обновление (PUT)
+    def put(self, request, *args, **kwargs):
+        return Response({"detail": "Update via this endpoint is not allowed."},
+                        status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
+    # Блокируем частичное обновление (PATCH)
+    def patch(self, request, *args, **kwargs):
+        return Response({"detail": "Partial update via this endpoint is not allowed."},
+                        status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
     def get_object(self):
         task = super().get_object()
@@ -46,63 +62,65 @@ class TaskDetailView(generics.RetrieveUpdateDestroyAPIView):
 
 # Создание новой задачи текущему пользователю
 class TaskCreateView(generics.CreateAPIView):
-    queryset = Task.objects.all()  
     serializer_class = TaskSerializer  
     permission_classes = [IsAuthenticated]  
 
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user)    
+        serializer.save(user=self.request.user)  
 
 
 # Обновление задачи
 class TaskUpdateView(generics.UpdateAPIView):
     queryset = Task.objects.all()
     serializer_class = TaskSerializer
-    permission_classes = [permissions.IsAuthenticated]  
-
-    def get_object(self):
-        task = super().get_object()
-        if task.user != self.request.user: # Проверяем, является ли обновляющий владельцем задачи
-            raise PermissionDenied("Вы не можете редактировать эту задачу, так как не являетесь её владельцем.")
-        return task
-
-
-# Удаление задачи
-class TaskDeleteView(generics.DestroyAPIView):
-    queryset = Task.objects.all()
-    serializer_class = TaskSerializer
-    permission_classes = [permissions.IsAuthenticated] 
-
-    def get_object(self):
-        task = super().get_object()
-        if task.user != self.request.user: # Проверяем, является ли удаляющий владельцем задачи
-            raise PermissionDenied("Вы не можете удалить эту задачу, так как не являетесь её владельцем.")
-        return task
-
-
-# Установка статуса в завершено 'complete'
-class MarkTaskCompletedView(generics.UpdateAPIView):
-    queryset = Task.objects.all()
     permission_classes = [permissions.IsAuthenticated]
 
     def perform_update(self, serializer):
+        task = self.get_object()  # Получаем задачу
+
+        # Проверка, является ли пользователь владельцем задачи
+        if task.user != self.request.user:
+            raise PermissionDenied("You do not have permission to update this task.")
+
+        # Если пользователь является владельцем, сохраняем изменения
+        serializer.save()
+
+
+# Удаление задачи по UID
+class TaskDeleteView(generics.DestroyAPIView):
+    serializer_class = TaskSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def delete(self, request, *args, **kwargs):
         task = self.get_object()
-        if task.user != self.request.user: # Изменять статус задачи может только хозяин
-            return Response({'detail': 'У вас нет прав на изменение этой задачи.'}, status=status.HTTP_403_FORBIDDEN)
         
-        # Изменение статуса задачи
-        task.status = 'completed'
+        if task.user != request.user:
+            raise PermissionDenied("You do not have permission to delete this task.")
+
+        task.delete()
+        
+        return Response({"detail": "Task successfully deleted."}, status=status.HTTP_200_OK)
+
+
+# Установка статуса 'complete'
+class MarkTaskCompletedView(generics.UpdateAPIView):
+    serializer_class = TaskSerializer  
+    permission_classes = [IsAuthenticated]
+
+    def update(self, request, *args, **kwargs):
+        task = self.get_object()
+        
+        task.status = "completed"
         task.save()
-        return Response({'detail': 'Задача успешно отмечена как выполненная.'}, status=status.HTTP_200_OK)
+
+        return Response({"detail": "Task status updated to 'completed'."}, status=status.HTTP_200_OK)
 
 
 # Фильтрация задач по статусу
-class TaskFilterStatusView(TaskListView):
+class TaskFilterStatusView(generics.ListAPIView):
+    serializer_class = TaskSerializer
+    permission_classes = [IsAuthenticated]
+
     def get_queryset(self):
-        queryset = super().get_queryset()    
-        status = self.request.query_params.get('status', None)
-
-        if status: # Если в запросе есть статус, фильтруем по нему
-            queryset = queryset.filter(status=status)
-        return queryset  # Возвращаем весь список или отфильтрованный
-
+        status = self.kwargs.get('status') # Получение статуса из запроса
+        return Task.objects.filter(status=status)

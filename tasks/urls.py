@@ -25,7 +25,7 @@ urlpatterns = [
     path('tasks/<int:pk>/complete/', views.MarkTaskCompletedView.as_view(), name='task-complete'),
 
     # Фильтр задач по статусу
-    path('tasks/status/', views.TaskFilterStatusView.as_view(), name='task-filter-by-status'),
+    path('tasks/status/<str:status>/', views.TaskFilterStatusView.as_view(), name='task-filter-by-status'),
 
     # JWT - эндпоинты
     # Получение refresh и acess токенов
