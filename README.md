@@ -1,5 +1,5 @@
 ```markdown
-# Todo List API app
+# **Todo List API app**
 
 Это REST API для управления задачами с использованием Django и PostgreSQL. Проект поддерживает аутентификацию с использованием JWT и использует Docker для контейнеризации приложения.
 
@@ -26,6 +26,7 @@
 - Docker и Docker Compose
 - Python 3.12 (если не использовать Docker)
 - Установленная и настроенная база данных PostgreSQL
+```
 
 ## Установка
 
