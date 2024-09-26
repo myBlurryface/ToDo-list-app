@@ -1,6 +1,6 @@
 # Окружение
 venv/
-env/
+.env/
 
 # IDE
 .vscode/
