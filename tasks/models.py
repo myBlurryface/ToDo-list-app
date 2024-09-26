@@ -7,7 +7,7 @@ class User(AbstractUser):
     first_name = models.CharField(max_length=50, blank=False)
     last_name = models.CharField(max_length=50, blank=True, null=True)
     username = models.CharField(max_length=20, unique=True, blank=False, null=False)
-    password = models.CharField(max_length=50, blank=False, null=True) # Минимальную длину в 6 символов контролируем на этапе валидации  
+    password = models.CharField(max_length=128, blank=False, null=True) # Минимальную длину в 6 символов контролируем на этапе валидации  
                                                 
     groups = models.ManyToManyField(
         'auth.Group',
