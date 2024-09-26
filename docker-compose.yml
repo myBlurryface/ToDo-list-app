@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:14.13
+    environment:
+      POSTGRES_DB: todo_list_db
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: raindrop
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - todo_list_network
+
+  web:
+    build: .
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    environment:
+      - DB_NAME=todo_list_db
+      - DB_USER=admin
+      - DB_PASSWORD=raindrop
+      - DB_HOST=db
+      - DB_PORT=5432
+    networks:
+      - todo_list_network
+
+networks:
+  todo_network:
+
+volumes:
+  postgres_data:
+
