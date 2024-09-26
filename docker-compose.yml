@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   db:
     image: postgres:14.13
@@ -31,7 +29,7 @@ services:
       - todo_list_network
 
 networks:
-  todo_network:
+  todo_list_network:
 
 volumes:
   postgres_data:
